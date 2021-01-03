@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request
-import mutagen
+from utils.songs.SongClassifier import SongClassifier
+import uuid
 
 app = Flask(__name__)
 
@@ -8,11 +9,9 @@ app = Flask(__name__)
 @app.route("/get-mix", methods=['POST'])
 def getmix():
     song_list = request.files.getlist("files")
-    for file in song_list:
-        song = mutagen.File(file, easy=True)
-        artist = song.get('artist')
-        title = song.get('title')
-        album = song.get('album')
+    song_classifier = SongClassifier()
+    request_id = uuid.uuid4()
+    song_classifier.deconstruct_songs(song_list, request_id)
 
 
 if __name__ == '__main__':
