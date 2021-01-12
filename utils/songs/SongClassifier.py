@@ -16,13 +16,16 @@ class SongClassifier:
     def deconstruct_songs(self, song_list, request_id):
         self.song_list[str(request_id)] = []
         for file in song_list:
+            # Saves song onto server
             filename = self.save_song(file, request_id)
+            # mutagen retrieves the metadata
             song = mutagen.File(filename, easy=True)
             artist = song.get('artist')
             title = song.get('title')
             album = song.get('album')
             mime = song.mime.pop(0)
             mime = mime.split("/")[1]
+            # Create flo_song object
             flo_song = Song(artist, album, title, mime, filename)
             music_brainz_id = find_music_brainz_id_by_recording(flo_song)
             flo_song.set_music_brainz_id(music_brainz_id)

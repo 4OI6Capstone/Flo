@@ -12,16 +12,24 @@ app.config['UPLOADED_FOLDER'] = "./uploaded_files/"
 
 @app.route("/get-mix", methods=['POST'])
 def getmix():
+    # Takes request's files
     song_list = request.files.getlist("files")
+    # Initialize song classifier object
     song_classifier = SongClassifier()
+    # Create random request Id
     request_id = uuid.uuid4()
+    # Creates request working directory
     create_request_dir(str(request_id))
+    # Get Music Brainz and Acoustic Brainz info
     song_classifier.deconstruct_songs(song_list, request_id)
+    # Creates Augmentor for the mix
     augmentor = Augmentor(song_classifier.song_list.get(str(request_id)))
+    # Creates the mix
     final_mix = augmentor.create_mix()
+    # Export
     final_mix.export(app.config['EXPORT_FOLDER'] + str(request_id) + "/final_mix.mp4", format="mp4")
-    print("done")
-    return "done"
+    # Returns request Id for particular mix
+    return str(request_id)
 
 
 def create_request_dir(request_id):
