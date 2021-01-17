@@ -1,4 +1,5 @@
 from utils import music_data_fetcher
+from utils.transistion.Transition import Transition
 
 
 class Song:
@@ -66,7 +67,10 @@ class Song:
 
     @transition.setter
     def transition(self, transition):
-        self._transition = transition
+        if isinstance(transition, Transition):
+            self._transition = transition
+        else:
+            raise TypeError(type(transition), "Invalid Transition Type")
 
 
     @mime.setter
