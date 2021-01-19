@@ -1,5 +1,7 @@
 from utils import music_data_fetcher
 from utils.transistion.Transition import Transition
+import logging
+log = logging.getLogger(__name__)
 
 
 class Song:
@@ -70,6 +72,7 @@ class Song:
         if isinstance(transition, Transition):
             self._transition = transition
         else:
+            log.error("Invalid transition type")
             raise TypeError(type(transition), "Invalid Transition Type")
 
 
