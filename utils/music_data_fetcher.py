@@ -1,9 +1,10 @@
 import musicbrainzngs
 import requests
-
+import logging
 acousticbrainz_url = "https://acousticbrainz.org"
 musicbrainzngs.set_useragent("McMaster 4OI6 Capstone Project", "0.1",
                              "https://github.com/4OI6Capstone/Flo")
+log = logging.getLogger(__name__)
 
 
 def find_music_brainz_id_by_recording(flo_song):
@@ -21,9 +22,12 @@ def find_music_brainz_id_by_recording(flo_song):
                 response = requests.get(request_url)
                 # Return id if response is ok
                 if response.ok:
+                    log.info("Successfully retrieved music brainz id for song artist: {} song title: {} | ID : {}"
+                             .format(song_artist, song_title, temp_id))
                     return temp_id
                 else:
                     continue
+    log.warning("Could not find any music brainz id for song artist")
 
 
 # Acoustic Brainz Request, default set to high level
@@ -33,12 +37,12 @@ def get_acoustic_brainz_data(music_brainz_id, level="high-level"):
         response = requests.get(request_url)
         response.raise_for_status()
     except requests.exceptions.HTTPError as errhttp:
-        print("Http Error:", errhttp)
+        log.error("Http Error:", errhttp)
     except requests.exceptions.ConnectionError as errconnection:
-        print("Error Connecting:", errconnection)
+        log.error("Error Connecting:", errconnection)
     except requests.exceptions.Timeout as errtimeout:
-        print("Timeout Error:", errtimeout)
+        log.error("Timeout Error:", errtimeout)
     except requests.exceptions.RequestException as err:
-        print("OOps: Something Else", err)
+        log.error("OOps: Something Else", err)
 
     return response.json()

@@ -2,6 +2,9 @@
 uploaded_files/
 mixes/
 
+# Logging
+app.log
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
