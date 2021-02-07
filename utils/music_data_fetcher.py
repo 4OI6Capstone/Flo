@@ -2,7 +2,7 @@ import musicbrainzngs
 import requests
 import logging
 acousticbrainz_url = "https://acousticbrainz.org"
-musicbrainzngs.set_useragent("McMaster 4OI6 Capstone Project", "0.1",
+musicbrainzngs.set_useragent("McMaster Capstone Project", "0.2",
                              "https://github.com/4OI6Capstone/Flo")
 log = logging.getLogger(__name__)
 
