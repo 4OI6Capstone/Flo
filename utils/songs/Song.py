@@ -13,13 +13,19 @@ class Song:
     _mime = None
     _filename = None
     _bpm = None
+    _length = None
 
-    def __init__(self, artist, album, title, mime, filename):
+    def __init__(self, artist, album, title, mime, filename, length):
         self._title = title
         self._album = album
         self._artist = artist
         self._mime = mime
         self._filename = filename
+        self._length = length
+
+    @property
+    def length(self):
+        return self._length
 
     @property
     def music_brainz_id(self):
@@ -52,6 +58,10 @@ class Song:
     @property
     def bpm(self):
         return self._bpm
+
+    @length.setter
+    def length(self, length):
+        self._length = length
 
     @bpm.setter
     def bpm(self, bpm):

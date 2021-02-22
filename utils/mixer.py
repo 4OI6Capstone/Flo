@@ -155,3 +155,4 @@ def mixer(top_file, bottom_file, output_file_path, sr=22050, mix_mode='random', 
     file_handle = played_togther.export(output_file_path, format='wav')
 
     return sync_beat_accuracy
+

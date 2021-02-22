@@ -34,7 +34,7 @@ def getmix():
     augmentor = Augmentor(song_classifier.song_list.get(str(request_id)))
     # Creates the mix
     app.logger.info("Creating final mix for request Id: {}".format(str(request_id)))
-    final_mix = augmentor.create_mix()
+    final_mix = augmentor.create_mix(request_id)
     # Export
     file_path = app.config['EXPORT_FOLDER'] + str(request_id) + "/final_mix.mp4"
     app.logger.info("Exporting final mix for request Id: {} to {}".format(str(request_id), file_path))

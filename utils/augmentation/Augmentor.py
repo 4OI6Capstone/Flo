@@ -3,9 +3,9 @@ from utils.augmentation.song_extensions import song_extensions
 from werkzeug.utils import secure_filename
 
 
-def join_songs(prev_song, next_song):
+def join_songs(prev_song, next_song, request_id):
     # Default so far cross fade
-    song_segment = prev_song.transition.apply(prev_song, next_song, cross_fade=5000)
+    song_segment = prev_song.transition.apply(prev_song, next_song, transition_time=40, request_id=str(request_id))
     return song_segment
 
 
@@ -15,13 +15,13 @@ class Augmentor:
     def __init__(self, song_list):
         self._song_list = song_list
 
-    def create_mix(self):
+    def create_mix(self, request_id):
         final_mix = AudioSegment.empty()
         for i in range(len(self._song_list) - 1):
             curr_song_file = self._song_list[i + 1]
             prev_song_file = self._song_list[i]
             # Create segment to add to final mix
-            mixed_song_segment = join_songs(prev_song_file, curr_song_file)
+            mixed_song_segment = join_songs(prev_song_file, curr_song_file, request_id)
             final_mix = final_mix + mixed_song_segment
 
         return final_mix
