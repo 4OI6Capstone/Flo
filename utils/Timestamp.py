@@ -5,7 +5,7 @@ from pydub import AudioSegment
 from pydub.utils import which
 import time
 from random import randint
-
+from utils.songs import Song
 
 
 def find_best_sync_point(bottom_file_beats, top_file_beats, max_mix_sample, offset, mode):
@@ -68,7 +68,7 @@ def find_best_sync_point(bottom_file_beats, top_file_beats, max_mix_sample, offs
 
 def timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880, trim_silence=False, sync_sample=None, timestamp=None):
 
-    # loading top file
+    # loading the first song in the transition
     y_top_file, sr = librosa.load(top_file, sr=sr)
 
     if trim_silence:
@@ -78,10 +78,9 @@ def timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880, tr
             # trimming only the leading silence
             y_top_file = y_top_file[i[0]:]
         except:
-            print ('[MixingBear] Failed to trim leading silence')
             pass
 
-    # loading bottom file
+    # loading second song in the transition
     y_bottom_file, sr = librosa.load(bottom_file, sr=sr)
 
     # checking if the durations allow proper mixing
@@ -89,7 +88,7 @@ def timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880, tr
     while (y_bottom_file.shape[0] * y_bottom_file_repetitions) < y_top_file.shape[0] :
         y_bottom_file_repetitions+=1
 
-    # repeating y_bottom_file if needed
+    # repeating y_bottom_file (second song in transition) if needed
     if (y_bottom_file_repetitions > 1):
         y_bottom_file_duplications = []
         for i in range(y_bottom_file_repetitions):
@@ -110,42 +109,8 @@ def timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880, tr
                                                         mode=mix_mode)
 
 
-    # mix the files
+    #calculate the timestamp
     sync_time_ms = sync_sample / sr * 1000
-
-    # loading files as pydub audiosegments
-    sound_seg = AudioSegment.from_file(top_file)
-    mix_seg = AudioSegment.from_file(bottom_file)
-
-    if sync_time_ms < 0:
-
-        position = (bottom_file_data['duration'] * 1000) + sync_time_ms
-        played_togther = mix_seg.overlay(sound_seg[:abs(int(sync_time_ms))], position=position, loop=False)
-        new = played_togther
-        played_togther = new.overlay(sound_seg[abs(int(sync_time_ms)):], position=0, loop=False)
-
-        del new
-        del position
-
-    elif (sync_time_ms + (top_file_data['duration'] * 1000)) > (bottom_file_data['duration'] * 1000):
-
-        sound_cut_point = int(bottom_file_data['duration']*1000 - sync_time_ms)
-
-        # mixing sound and mix at 2 points
-        played_togther = mix_seg.overlay(sound_seg[:sound_cut_point], position=int(sync_time_ms), loop=False)
-        new = played_togther
-        played_togther = new.overlay(sound_seg[sound_cut_point:], position=0, loop=False)
-
-        del new
-
-    else:
-
-        # mixing sound and mix at sync_time_ms
-        played_togther = mix_seg.overlay(sound_seg, position=sync_time_ms, loop=False)
-
-    # clearning audio segment from the memory
-    del mix_seg
-    del sound_seg
 
 
     return sync_time_ms
@@ -197,39 +162,4 @@ def timestamp_loop(top_file, bottom_file, sr=22050, mix_mode='random', offset=88
     # mix the files
     sync_time_ms = sync_sample / sr * 1000
 
-    # loading files as pydub audiosegments
-    sound_seg = AudioSegment.from_file(top_file)
-    mix_seg = AudioSegment.from_file(bottom_file)
-
-    if sync_time_ms < 0:
-
-        position = (bottom_file_data['duration'] * 1000) + sync_time_ms
-        played_togther = mix_seg.overlay(sound_seg[:abs(int(sync_time_ms))], position=position, loop=False)
-        new = played_togther
-        played_togther = new.overlay(sound_seg[abs(int(sync_time_ms)):], position=0, loop=False)
-
-        del new
-        del position
-
-    elif (sync_time_ms + (top_file_data['duration'] * 1000)) > (bottom_file_data['duration'] * 1000):
-
-        sound_cut_point = int(bottom_file_data['duration']*1000 - sync_time_ms)
-
-        # mixing sound and mix at 2 points
-        played_togther = mix_seg.overlay(sound_seg[:sound_cut_point], position=int(sync_time_ms), loop=False)
-        new = played_togther
-        played_togther = new.overlay(sound_seg[sound_cut_point:], position=0, loop=False)
-
-        del new
-
-    else:
-
-        # mixing sound and mix at sync_time_ms
-        played_togther = mix_seg.overlay(sound_seg, position=sync_time_ms, loop=False)
-
-    # clearning audio segment from the memory
-    del mix_seg
-    del sound_seg
-
-
-    return (sync_time_ms - ((4/(bpm/60))*1000))
+    return (sync_time_ms - ((4/(Song.bpm()/60))*1000))
