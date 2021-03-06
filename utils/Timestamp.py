@@ -12,13 +12,14 @@ import Timestamp_utils as tu
 
 
 
-
+s1 = Song()
+s2 = Song()
 
 #top_file represents the first music file that's being mixed and bottom_file represents the second song being brought in
-def get_timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880, trim_silence=False, sync_sample=None, timestamp=None):
+def get_timestamp(s1, s2, sr=22050, mix_mode='random', offset=880, trim_silence=False):
 
     # loading the first song in the transition
-    y_top_file, sr = librosa.load(top_file, sr=sr)
+    y_top_file, sr = librosa.load(s1.filename, sr=sr)
 
     if trim_silence:
         try:
@@ -30,7 +31,7 @@ def get_timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880
             pass
 
     # loading second song in the transition
-    y_bottom_file, sr = librosa.load(bottom_file, sr=sr)
+    y_bottom_file, sr = librosa.load(s2.filename, sr=sr)
 
     # checking if the durations allow proper mixing
     y_bottom_file_repetitions = 1
@@ -64,10 +65,10 @@ def get_timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880
 
     return sync_time_ms
 
-def get_timestamp_loop(top_file, bottom_file, sr=22050, mix_mode='random', offset=880, trim_silence=False, sync_sample=None, timestamp=None):
+def get_timestamp_loop(s1, s2, sr=22050, mix_mode='random', offset=880, trim_silence=False,):
 
     # loading top file
-    y_top_file, sr = librosa.load(top_file, sr=sr)
+    y_top_file, sr = librosa.load(s1.filename, sr=sr)
 
     if trim_silence:
         try:
@@ -80,7 +81,7 @@ def get_timestamp_loop(top_file, bottom_file, sr=22050, mix_mode='random', offse
             pass
 
     # loading bottom file
-    y_bottom_file, sr = librosa.load(bottom_file, sr=sr)
+    y_bottom_file, sr = librosa.load(s2.filename, sr=sr)
 
     # checking if the durations allow proper mixing
     y_bottom_file_repetitions = 1
@@ -111,4 +112,4 @@ def get_timestamp_loop(top_file, bottom_file, sr=22050, mix_mode='random', offse
     # mix the files
     sync_time_ms = sync_sample / sr * 1000
 
-    return (sync_time_ms - ((4/(Song.bpm()/60))*1000))
+    return (sync_time_ms - ((4/(s1.bpm()/60))*1000))
