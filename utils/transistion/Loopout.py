@@ -25,20 +25,10 @@ class Loopout(Transition):
            :param prev_song: prev_song
            :param bar_timestamp: The point at which the bar we want to start transitioning out of
            :param bar_end_timestamp: The end timing time of the specified bar
-           :param prev_cutoff: Low-pass freq cutoff for outgoing song
-           :param next_cutoff: Low-pass freq cutoff for incoming song during the loop (will be played underneath)
-           :param num_full_bars:Number of times to loop the full bar
-           :param num_half_bars:Number of times to loop the half-bar
-           :param num_quart_bars:Number of times to loop the quarter bar
            :return: returns an AudioSegment with the loop transition in between the two songs.
         """
         bar_time = kwargs.pop('bar_timestamp')
         bar_end_time = kwargs.pop('bar_end_timestamp')
-        prev_song_freq_cutoff = kwargs.setdefault('prev_cutoff', 4000)
-        next_song_freq_cutoff = kwargs.setdefault('next_cutoff', 2000)
-        full_repeat = kwargs.setdefault('num_full_bars', 4)
-        half_repeat = kwargs.setdefault('num_half_bars', 4)
-        quarter_repeat = kwargs.setdefault('num_quart_bars', 4)
 
         # Get extension of song file
         next_ext = song_extensions.get(next_song.mime, next_song.mime)
@@ -50,26 +40,56 @@ class Loopout(Transition):
         prev_song_stripped = prev_song[:bar_time]
         prev_song_bar = prev_song[bar_time:bar_end_time]
         bar_length = bar_end_time - bar_time
-        curr_bar_half = prev_song_bar[:bar_length / 2]
-        curr_bar_quarter = prev_song_bar[:bar_length / 4]
-        for i in range(full_repeat):
+        prev_bar_half = prev_song_bar[:bar_length / 2]
+        prev_bar_quarter = prev_song_bar[:bar_length / 4]
+        quarter_bar_time = len(prev_bar_quarter)
+
+        four_bar_loop = prev_song_bar
+
+        four_bar_loop = four_bar_loop.append(prev_song_bar).append(prev_song_bar).append(prev_song_bar)
+        four_bar_loop_length = len(four_bar_loop)
+        freq_to_cutoff_1 = [270, 400, 600, 1000]
+        freq_to_cutoff_2 = [2000, 2500, 3000, 3500]
+        # 4k,4k,5k,5k or 4 5 6 7
+        freq_to_cutoff_3 = [4000, 4000, 5000, 5000]
+
+        for i in range(4):
+            four_bar_loop = four_bar_loop.append(scipy_effects.high_pass_filter
+                                                 (prev_song_bar, freq_to_cutoff_1[i], 5))
+        for i in range(4):
+            four_bar_loop = four_bar_loop.append(
+                scipy_effects.high_pass_filter(prev_bar_half, freq_to_cutoff_2[i], 5))
+        for i in range(4):
+            four_bar_loop = four_bar_loop.append(
+                scipy_effects.high_pass_filter(prev_bar_quarter, freq_to_cutoff_3[i]))
+        prev_song_stripped = prev_song_stripped.append(four_bar_loop, crossfade=0)
+        # start processing for next song here
+        next_song_seg = next_song[:len(four_bar_loop) * 2]
+        window_left = 0
+        window_right = len(prev_song_bar)
+        freq_to_cutoff = [270, 400, 600, 1000, 2000, 2500, 3000, 3500]
+        for i in range(8):
             if i == 0:
-                result = prev_song_bar
+                next_song_seg_filtered = scipy_effects.low_pass_filter(next_song_seg[window_left:window_right],
+                                                                       freq_to_cutoff[i])
             else:
-                result = result.append(prev_song_bar)
-        for i in range(half_repeat):
-            result = result.append(curr_bar_half)
-        for i in range(quarter_repeat):
-            result = result.append(curr_bar_quarter)
+                next_song_seg_filtered = next_song_seg_filtered.append(
+                    scipy_effects.low_pass_filter(next_song_seg[window_left:window_right], freq_to_cutoff[i]),
+                    crossfade=0)
+            window_left = window_right
+            window_right += quarter_bar_time
 
-        result = scipy_effects.low_pass_filter(result, prev_song_freq_cutoff, order=1)
-        overlap_duration = len(result)
-        next_song_seg = next_song[:overlap_duration]
-        next_song_seg = scipy_effects.low_pass_filter(next_song_seg, next_song_freq_cutoff, order=2)
-        result = next_song_seg.overlay(result, gain_during_overlay=-5)
+        next_song_seg_filtered = next_song_seg_filtered.append(next_song_seg[len(next_song_seg_filtered):], crossfade=0)
+        next_song_stripped = next_song[len(next_song_seg_filtered):]
+        next_song_seg_filtered = next_song_seg_filtered.append(next_song_stripped)
+        # overlay songs here
+        overlap_time = bar_time + four_bar_loop_length
+        overlap_for_next_song = len(prev_song_stripped[overlap_time:])
+        next_song_overlay = next_song_seg_filtered[:overlap_for_next_song]
+        next_song_seg_filtered = next_song_seg_filtered[len(next_song_overlay):]
+        output = prev_song_stripped.overlay(next_song_overlay, position=overlap_time, gain_during_overlay=-1)
+        output = output.append(next_song_seg_filtered)
 
-        result = result.append(next_song[overlap_duration:], crossfade=100)
-        output = prev_song_stripped.append(result, crossfade=500)
         return output
 
     @property
