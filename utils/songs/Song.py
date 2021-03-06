@@ -14,6 +14,8 @@ class Song:
     _filename = None
     _bpm = None
     _length = None
+    _danceability = None
+    _loudness = None
 
     def __init__(self, artist, album, title, mime, filename, length):
         self._title = title
@@ -22,6 +24,14 @@ class Song:
         self._mime = mime
         self._filename = filename
         self._length = length
+
+    @property
+    def danceability(self):
+        return self._danceability
+
+    @property
+    def loudness(self):
+        return self._loudness
 
     @property
     def length(self):
@@ -58,6 +68,14 @@ class Song:
     @property
     def bpm(self):
         return self._bpm
+
+    @danceability.setter
+    def danceability(self, danceability):
+        self._danceability = danceability
+
+    @loudness.setter
+    def loudness(self, loudness):
+        self._loudness = loudness
 
     @length.setter
     def length(self, length):
