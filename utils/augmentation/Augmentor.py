@@ -19,13 +19,13 @@ def join_songs(prev_song, next_song, request_id):
     return song_segment
 
 
-def find_transition(prev_song, next_song, configs):
+def find_transition(prev_song, next_song, thresholds):
     bpm_difference = abs(prev_song.bpm - next_song.bpm)
     dancabililty_difference = abs(prev_song.danceability - next_song.danceability)
     loudness_difference = abs(prev_song.loudness - next_song.loudness)
     # Loop through transitions and compare difference tresholds to song differences
-    for transition in configs:
-        transition_config = configs[transition]
+    for transition in thresholds:
+        transition_config = thresholds[transition]
         bpm_threshold = transition_config.get('bpm_threshold')
         danceability_threshold = transition_config.get('danceability_threshold')
         loudness_threshold = transition_config.get('loudness_threshold')

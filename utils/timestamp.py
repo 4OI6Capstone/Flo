@@ -4,10 +4,19 @@ import numpy as np
 import utils.timestamp_utils as tu
 
 
-# top_file represents the first music file that's being mixed and bottom_file represents the second song being brought in
-def get_timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880, trim_silence=False, sync_sample=None,
-                  timestamp=None):
+def get_timestamp(prev_song, next_song, sr=22050, mix_mode='random', offset=880, trim_silence=False):
+    """
+        :param next_song: next song in the mix
+        :param prev_song: previous song
+        :param sr: sample rate
+        :param mix_mode:
+        :param offset:
+        :param trim_silence:
+        :return: timestamp in milliseconds where the best place to transition is
+    """
     # loading the first song in the transition
+    top_file = next_song.filename
+    bottom_file = prev_song.filename
     y_top_file, sr = librosa.load(top_file, sr=sr)
 
     if trim_silence:
@@ -52,9 +61,19 @@ def get_timestamp(top_file, bottom_file, sr=22050, mix_mode='random', offset=880
     return sync_time_ms
 
 
-def get_timestamp_loop(top_file, bottom_file, sr=22050, mix_mode='random', offset=880, trim_silence=False,
-                       sync_sample=None, timestamp=None):
+def get_timestamp_loop(prev_song, next_song, sr=22050, mix_mode='random', offset=880, trim_silence=False):
+    """
+        :param next_song: next song in the mix
+        :param prev_song: previous song
+        :param sr: sample rate
+        :param mix_mode:
+        :param offset:
+        :param trim_silence:
+        :return: timestamp in milliseconds where the best place to transition is
+    """
     # loading top file
+    top_file = next_song.filename
+    bottom_file = prev_song.filename
     y_top_file, sr = librosa.load(top_file, sr=sr)
 
     if trim_silence:
@@ -76,7 +95,7 @@ def get_timestamp_loop(top_file, bottom_file, sr=22050, mix_mode='random', offse
         y_bottom_file_repetitions += 1
 
     # repeating y_bottom_file if needed
-    if (y_bottom_file_repetitions > 1):
+    if y_bottom_file_repetitions > 1:
         y_bottom_file_duplications = []
         for i in range(y_bottom_file_repetitions):
             y_bottom_file_duplications.append(y_bottom_file)
@@ -97,4 +116,4 @@ def get_timestamp_loop(top_file, bottom_file, sr=22050, mix_mode='random', offse
     # mix the files
     sync_time_ms = sync_sample / sr * 1000
 
-    return (sync_time_ms - ((4 / (Song.bpm() / 60)) * 1000))
+    return sync_time_ms - ((4 / (prev_song.bpm / 60)) * 1000)
