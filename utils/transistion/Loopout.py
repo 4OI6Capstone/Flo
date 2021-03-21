@@ -2,11 +2,22 @@ from pydub import AudioSegment
 from pydub import scipy_effects
 from utils.augmentation.song_extensions import song_extensions
 from utils.transistion.Transition import Transition
+from utils.transition_configs import loopout_config
 
 
 class Loopout(Transition):
+    name = "loopout_transition"
+    _config = dict()
+
     def __init__(self):
+        self._config = loopout_config
         pass
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return self.name == other.name
 
     def apply(self, prev_song, next_song, **kwargs):
         """
@@ -61,3 +72,10 @@ class Loopout(Transition):
         output = prev_song_stripped.append(result, crossfade=500)
         return output
 
+    @property
+    def config(self):
+        return self._config
+
+    @config.setter
+    def config(self, config):
+        self._config = config
