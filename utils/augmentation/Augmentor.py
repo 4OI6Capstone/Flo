@@ -11,10 +11,10 @@ def join_songs(prev_song, next_song, request_id):
     # Check to see if config if a bar transition or time transition
     if transition_config.get("bar_transition"):
         # Get bar transition time
-        transition_config["bar_timestamp"] = get_timestamp_loop(prev_song.filename, next_song.filename)
+        transition_config["bar_timestamp"] = get_timestamp_loop(prev_song, next_song)
     else:
         # Get transition time
-        transition_config["transition_time"] = get_timestamp(prev_song.filename, next_song.filename)
+        transition_config["transition_time"] = get_timestamp(prev_song, next_song)
     song_segment = prev_song.transition.apply(prev_song, next_song, **transition_config, request_id=str(request_id))
     return song_segment
 
