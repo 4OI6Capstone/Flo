@@ -10,3 +10,9 @@ crossfade_config = {
     'cross_fade': 5000,
     'bar_transition': False
 }
+loopin_config = {
+    'bar_transition': True,
+}
+seamlessfade_config = {
+    'bar_transition': True
+}

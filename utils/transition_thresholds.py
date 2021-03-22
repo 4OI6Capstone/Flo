@@ -1,6 +1,8 @@
 from utils.transistion.CrossFade import CrossFade
 from utils.transistion.Tempo import Tempo
 from utils.transistion.Loopout import Loopout
+from utils.transistion.LoopIn import LoopIn
+from utils.transistion.SeamlessFade import SeamlessFade
 
 transition_thresholds = {
     Tempo: {
@@ -17,6 +19,16 @@ transition_thresholds = {
         'bpm_threshold': 40,
         'danceability_threshold': 1,
         'loudness_threshold': 1
+    },
+    LoopIn: {
+        'bpm_threshold' : 30,
+        'danceability_threshold': .8,
+        'loudness_threshold': .5
+    },
+    SeamlessFade: {
+        'bpm_threshold': 50,
+        'danceability_threshold': .5,
+        'loudness_threshold': .75
     }
 }
 

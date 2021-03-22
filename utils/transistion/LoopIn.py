@@ -29,9 +29,17 @@ class LoopIn(Transition):
         """
 
         prev_song_timestamp = kwargs.pop('prev_song_timestamp')
-        next_song_timestamp = kwargs.pop('next_song_timestamp')
+
+        # Get extension of song file
+        next_ext = song_extensions.get(next_song.mime, next_song.mime)
+        prev_ext = song_extensions.get(prev_song.mime, prev_song.mime)
+        next_song_timestamp = 4 / (next_song.bpm / 60) * 1000
+        # Create and AudioSegment object from the song_file
+        next_song = AudioSegment.from_file(next_song.filename, format=next_ext)
+        prev_song = AudioSegment.from_file(prev_song.filename, format=prev_ext)
 
         #idk about this, it strips the silence of the incoming song
+
         start_of_song = silence.detect_leading_silence(next_song, chunk_size=2)
 
         next_song_bar = next_song[start_of_song:next_song_timestamp]
