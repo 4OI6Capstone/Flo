@@ -21,6 +21,7 @@ def add_fetched_acoustic_brainz_info(flo_song, acoustic_brainz_info):
     flo_song.bpm = round(rhythm_data.get("bpm"), 1)
     flo_song.danceability = rhythm_data.get("danceability")
     flo_song.loudness = low_level_data.get("average_loudness")
+    flo_song.dynamic_complexity = low_level_data.get("dynamic_complexity")
     return flo_song
 
 

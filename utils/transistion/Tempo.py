@@ -81,7 +81,7 @@ class Tempo(Transition):
         prev_song_cut = prev_song_as[:((trans_time - bpm_change) * 1000)]
         # Loop through augmented segments and add them back together
         for segment in augmented_segments:
-            prev_song_cut = prev_song_cut.append(segment, crossfade=100)
+            prev_song_cut = prev_song_cut.append(segment, crossfade=0)
 
         combined = prev_song_cut.append(next_song_as, crossfade=2000)
         return combined

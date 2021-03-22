@@ -11,7 +11,7 @@ crossfade_config = {
     'bar_transition': False
 }
 loopin_config = {
-    'bar_transition': True,
+    'bar_transition': False
 }
 seamlessfade_config = {
     'bar_transition': True

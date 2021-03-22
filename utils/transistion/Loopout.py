@@ -27,7 +27,7 @@ class Loopout(Transition):
            :param bar_end_timestamp: The end timing time of the specified bar
            :return: returns an AudioSegment with the loop transition in between the two songs.
         """
-        bar_time = kwargs.pop('bar_timestamp')
+        bar_time = kwargs.pop('transition_timestamp')
         bar_end_time = kwargs.pop('bar_end_timestamp')
 
         # Get extension of song file
@@ -87,7 +87,7 @@ class Loopout(Transition):
         overlap_for_next_song = len(prev_song_stripped[overlap_time:])
         next_song_overlay = next_song_seg_filtered[:overlap_for_next_song]
         next_song_seg_filtered = next_song_seg_filtered[len(next_song_overlay):]
-        output = prev_song_stripped.overlay(next_song_overlay, position=overlap_time, gain_during_overlay=-1)
+        output = prev_song_stripped.overlay(next_song_overlay, position=overlap_time, gain_during_overlay=0)
         output = output.append(next_song_seg_filtered)
 
         return output

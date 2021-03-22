@@ -28,7 +28,7 @@ transition_thresholds = {
     SeamlessFade: {
         'bpm_threshold': 50,
         'danceability_threshold': .5,
-        'loudness_threshold': .75
+        'loudness_threshold': .5
     }
 }
 

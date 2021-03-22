@@ -11,7 +11,7 @@ class LoopIn(Transition):
     _config = dict()
 
     def __init__(self):
-        self._config = loopout_config
+        self._config = loopin_config
         pass
 
     def __hash__(self):
@@ -28,7 +28,7 @@ class LoopIn(Transition):
         :return: Audiosegment with the loopin transition applied.
         """
 
-        prev_song_timestamp = kwargs.pop('prev_song_timestamp')
+        prev_song_timestamp = kwargs.pop('transition_timestamp')
 
         # Get extension of song file
         next_ext = song_extensions.get(next_song.mime, next_song.mime)

@@ -16,6 +16,7 @@ class Song:
     _length = None
     _danceability = None
     _loudness = None
+    _dynamic_complexity = None
 
     def __init__(self, artist, album, title, mime, filename, length):
         self._title = title
@@ -28,6 +29,10 @@ class Song:
     @property
     def danceability(self):
         return self._danceability
+
+    @property
+    def dynamic_complexity(self):
+        return self._dynamic_complexity
 
     @property
     def loudness(self):
@@ -72,6 +77,10 @@ class Song:
     @danceability.setter
     def danceability(self, danceability):
         self._danceability = danceability
+
+    @dynamic_complexity.setter
+    def dynamic_complexity(self, dynamic_complexity):
+        self._dynamic_complexity = dynamic_complexity
 
     @loudness.setter
     def loudness(self, loudness):

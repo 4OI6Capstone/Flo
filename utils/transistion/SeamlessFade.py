@@ -10,7 +10,7 @@ class SeamlessFade(Transition):
     _config = dict()
 
     def __init__(self):
-        self._config = loopout_config
+        self._config = seamlessfade_config
         pass
 
     def __hash__(self):
@@ -76,7 +76,7 @@ class SeamlessFade(Transition):
             window_left = window_right
             window_right += beat_length
         next_song = next_song_seg.append(next_song_stripped, crossfade=0)
-        next_song = next_song.overlay(prev_song_seg, gain_during_overlay=-1)
+        next_song = next_song.overlay(prev_song_seg, gain_during_overlay=0)
         output = prev_song.append(next_song, crossfade=0)
         return output
 
