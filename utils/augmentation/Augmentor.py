@@ -3,6 +3,7 @@ from pydub import AudioSegment
 from utils.timestamp import get_timestamp_loop, get_timestamp
 from utils.transition_thresholds import transition_thresholds
 from utils.transistion.CrossFade import CrossFade
+from utils.transistion.Loopout import Loopout
 
 
 def join_songs(prev_song, next_song, request_id):
@@ -11,7 +12,9 @@ def join_songs(prev_song, next_song, request_id):
     # Check to see if config if a bar transition or time transition
     if transition_config.get("bar_transition"):
         # Get bar transition time
-        transition_config["bar_timestamp"] = get_timestamp_loop(prev_song, next_song)
+        output_from_module_3 = get_timestamp_loop(prev_song, next_song)
+        transition_config["transition_timestamp"] = output_from_module_3[0]
+        transition_config["bar_end_timestamp"] = output_from_module_3[1]
     else:
         # Get transition time
         transition_config["transition_time"] = get_timestamp(prev_song, next_song)
@@ -23,7 +26,8 @@ def find_transition(prev_song, next_song, thresholds):
     bpm_difference = abs(prev_song.bpm - next_song.bpm)
     dancabililty_difference = abs(prev_song.danceability - next_song.danceability)
     loudness_difference = abs(prev_song.loudness - next_song.loudness)
-    # Loop through transitions and compare difference tresholds to song differences
+    # Loop through transitions and compare difference thresholds to song differences
+    #return Loopout()
     for transition in thresholds:
         transition_config = thresholds[transition]
         bpm_threshold = transition_config.get('bpm_threshold')
