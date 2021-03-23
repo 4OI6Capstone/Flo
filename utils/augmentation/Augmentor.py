@@ -1,5 +1,7 @@
 from pydub import AudioSegment
 import logging
+
+from utils.augmentation.song_extensions import song_extensions
 from utils.timestamp import get_timestamp_loop, get_timestamp
 from utils.transition_thresholds import transition_thresholds
 from utils.transistion.CrossFade import CrossFade
@@ -10,19 +12,23 @@ from utils.transistion.SeamlessFade import SeamlessFade
 
 log = logging.getLogger(__name__)
 
-def join_songs(prev_song, next_song, request_id):
+def join_songs(final_segment, curr_song, prev_song, transition_time, transition_bar_time, request_id):
     # Get transition specific configs
     transition_config = prev_song.transition.config
+    curr_song_ext = song_extensions.get(curr_song.mime, curr_song.mime)
+    curr_song_segment = AudioSegment.from_file(curr_song.filename, format=curr_song_ext)
+    transition_config["curr_song_bpm"] = curr_song.bpm
+    transition_config["prev_song_bpm"] = prev_song.bpm
     # Check to see if config if a bar transition or time transition
     if transition_config.get("bar_transition"):
         # Get bar transition time
-        output_from_module_3 = get_timestamp_loop(prev_song, next_song)
-        transition_config["transition_timestamp"] = output_from_module_3[0]
-        transition_config["bar_end_timestamp"] = output_from_module_3[1]
+        transition_config["transition_timestamp"] = transition_time
+        transition_config["bar_end_timestamp"] = transition_bar_time
     else:
         # Get transition time
-        transition_config["transition_time"] = get_timestamp(prev_song, next_song)
-    song_segment = prev_song.transition.apply(prev_song, next_song, **transition_config, request_id=str(request_id))
+        transition_config["transition_time"] = transition_time
+    song_segment = prev_song.transition.apply(final_segment, curr_song_segment, **transition_config,
+                                              request_id=str(request_id))
     return song_segment
 
 
@@ -50,21 +56,48 @@ def find_transition(prev_song, next_song, thresholds):
 
 class Augmentor:
     _song_list = list()
+    current_mix_time_ms = 0
 
     def __init__(self, song_list):
         self._song_list = song_list
         self.apply_transitions()
+        self.find_transition_times()
 
     def create_mix(self, request_id):
-        final_mix = AudioSegment.empty()
+        first_song = self._song_list[0]
+        first_song_ext = song_extensions.get(first_song.mime, first_song.mime)
+        final_mix = AudioSegment.from_file(first_song.filename, format=first_song_ext)
         for i in range(len(self._song_list) - 1):
             curr_song_file = self._song_list[i + 1]
             prev_song_file = self._song_list[i]
+            transition_time = self.current_mix_time_ms + prev_song_file.transition_time
+            transition_bar_time = self.current_mix_time_ms + prev_song_file.transition_bar_time
             # Create segment to add to final mix
-            mixed_song_segment = join_songs(prev_song_file, curr_song_file, request_id)
-            final_mix = final_mix + mixed_song_segment
+            mixed_song_segment = join_songs(final_mix, curr_song_file, prev_song_file, transition_time,
+                                            transition_bar_time, request_id)
+            final_mix = mixed_song_segment
+            self.current_mix_time_ms = final_mix.duration_seconds*1000
 
         return final_mix
+
+    def find_transition_times(self):
+        for i in range(len(self._song_list) - 1):
+            curr_song = self._song_list[i + 1]
+            prev_song = self._song_list[i]
+            transition_config = prev_song.transition.config
+            if transition_config.get("bar_transition"):
+                # Get bar transition time
+                log.info("Starting Bar transition time finder")
+                output_from_module_3 = get_timestamp_loop(prev_song, curr_song)
+                transition_time = output_from_module_3[0]
+                transition_bar_time = output_from_module_3[1]
+            else:
+                # Get transition time
+                log.info("Starting normal transition time finder")
+                transition_time = get_timestamp(prev_song, curr_song)
+                transition_bar_time = 0
+            prev_song.transition_time = transition_time
+            prev_song.transition_bar_time = transition_bar_time
 
     def apply_transitions(self):
         for i in range(0, len(self._song_list) - 1):

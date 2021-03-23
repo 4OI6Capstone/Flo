@@ -4,6 +4,9 @@ from utils.music_data_fetcher import *
 from utils.songs.Song import Song
 from werkzeug.utils import secure_filename
 
+from utils.timestamp import get_timestamp_loop, get_timestamp
+
+
 def create_song_from_metadata(song, filename):
     artist = song.get('artist')
     title = song.get('title')

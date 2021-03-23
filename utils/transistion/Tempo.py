@@ -50,40 +50,37 @@ class Tempo(Transition):
     def __eq__(self, other):
         return self.name == other.name
 
-    def apply(self, prev_song, next_song, **kwargs):
+    def apply(self, prev_song, curr_song, **kwargs):
         """
         :param next_song: next_song
         :param prev_song: prev_song
         :param transition_time: time the transition takes place, the function will apply n segments of
         slowing/speeding up beforehand
         """
+        # Get bpms
+        prev_song_bpm = kwargs.get("prev_song_bpm")
+        curr_song_bpm = kwargs.get("curr_song_bpm")
         # Grab transition time
-        trans_time = round(kwargs.setdefault("transition_time", round(prev_song.length - 1))/1000)
+        trans_time = round(kwargs.setdefault("transition_time", 0))
         request_id = kwargs.setdefault("request_id", 1)
-        # Find extension of song file
-        next_ext = song_extensions.get(next_song.mime, next_song.mime)
-        prev_ext = song_extensions.get(prev_song.mime, prev_song.mime)
-        # Create and AudioSegment object from the song_file
-        next_song_as = AudioSegment.from_file(next_song.filename, format=next_ext)
-        prev_song_as = AudioSegment.from_file(prev_song.filename, format=prev_ext)
         # Calculate bpm change and find direction
-        bpm_change = int(abs(prev_song.bpm - next_song.bpm))
+        bpm_change = int(abs(prev_song_bpm - curr_song_bpm))
         if bpm_change < 1:
-            return prev_song_as.append(next_song_as, crossfade=2000)
-        direction = 1 if prev_song.bpm < next_song.bpm else -1
+            return prev_song.append(prev_song, crossfade=2000)
+        direction = 1 if prev_song_bpm < curr_song_bpm else -1
         # Iterate through transition segments and create segments for every second
         for i in range(bpm_change, 0, -1):
-            trans_seg = prev_song_as[(trans_time - i) * 1000:(trans_time - i + 1) * 1000]
+            trans_seg = prev_song[(trans_time - i*1000):(trans_time - (i - 1)*1000)]
             self._segment_list.append(trans_seg)
 
         # Create augmented segments
-        augmented_segments = augment_segments(self._segment_list, prev_song.bpm, next_song.bpm, request_id, direction)
-        prev_song_cut = prev_song_as[:((trans_time - bpm_change) * 1000)]
+        augmented_segments = augment_segments(self._segment_list, prev_song_bpm, curr_song_bpm, request_id, direction)
+        prev_song_cut = prev_song[:(trans_time - bpm_change* 1000)]
         # Loop through augmented segments and add them back together
         for segment in augmented_segments:
             prev_song_cut = prev_song_cut.append(segment, crossfade=0)
 
-        combined = prev_song_cut.append(next_song_as, crossfade=2000)
+        combined = prev_song_cut.append(curr_song, crossfade=2000)
         return combined
 
     @property

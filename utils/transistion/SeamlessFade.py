@@ -31,12 +31,6 @@ class SeamlessFade(Transition):
 
         transition_timestamp = kwargs.pop('transition_timestamp')
         bar_end_timestamp = kwargs.pop('bar_end_timestamp')
-        # Get extension of song file
-        next_ext = song_extensions.get(next_song.mime, next_song.mime)
-        prev_ext = song_extensions.get(prev_song.mime, prev_song.mime)
-        # Create and AudioSegment object from the song_file
-        next_song = AudioSegment.from_file(next_song.filename, format=next_ext)
-        prev_song = AudioSegment.from_file(prev_song.filename, format=prev_ext)
 
         two_bar_timestamp = (bar_end_timestamp - transition_timestamp) * 2
         prev_song_overlay = prev_song[transition_timestamp:transition_timestamp + two_bar_timestamp]

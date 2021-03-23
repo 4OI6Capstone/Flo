@@ -29,16 +29,10 @@ class LoopIn(Transition):
         """
 
         prev_song_timestamp = kwargs.pop('transition_time')
-
-        # Get extension of song file
-        next_ext = song_extensions.get(next_song.mime, next_song.mime)
-        prev_ext = song_extensions.get(prev_song.mime, prev_song.mime)
-        next_song_timestamp = 4 / (next_song.bpm / 60) * 1000
+        # Get bpms
+        curr_song_bpm = kwargs.get("curr_song_bpm")
+        next_song_timestamp = 4 / (curr_song_bpm / 60) * 1000
         # Create and AudioSegment object from the song_file
-        next_song = AudioSegment.from_file(next_song.filename, format=next_ext)
-        prev_song = AudioSegment.from_file(prev_song.filename, format=prev_ext)
-
-        #idk about this, it strips the silence of the incoming song
 
         start_of_song = silence.detect_leading_silence(next_song, chunk_size=2)
 
@@ -59,7 +53,10 @@ class LoopIn(Transition):
         window_left = loop_in_start_time
         window_right = window_left + increment_length
 
-        for i in range(8):
+        # something wrong with this. It's window is indexing outside of the previous song
+        # (which I changed to be songs A&B&C+... rather than just song A|B|C)
+        # Set 8 to 3 to test to see if my method of create-mix is correct
+        for i in range(3):
             if i == 0:
                 prev_song_seg = scipy_effects.high_pass_filter(prev_song[window_left:window_right],
                                                                freq_highpass_cutoffs[i], 1)

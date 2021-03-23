@@ -30,13 +30,6 @@ class Loopout(Transition):
         bar_time = kwargs.pop('transition_timestamp')
         bar_end_time = kwargs.pop('bar_end_timestamp')
 
-        # Get extension of song file
-        next_ext = song_extensions.get(next_song.mime, next_song.mime)
-        prev_ext = song_extensions.get(prev_song.mime, prev_song.mime)
-        # Create and AudioSegment object from the song_file
-        next_song = AudioSegment.from_file(next_song.filename, format=next_ext)
-        prev_song = AudioSegment.from_file(prev_song.filename, format=prev_ext)
-
         prev_song_stripped = prev_song[:bar_time]
         prev_song_bar = prev_song[bar_time:bar_end_time]
         bar_length = bar_end_time - bar_time

@@ -17,6 +17,8 @@ class Song:
     _danceability = None
     _loudness = None
     _dynamic_complexity = None
+    _transition_time = None
+    _transition_bar_time = None
 
     def __init__(self, artist, album, title, mime, filename, length):
         self._title = title
@@ -24,7 +26,11 @@ class Song:
         self._artist = artist
         self._mime = mime
         self._filename = filename
-        self._length = length
+        self._length = length*1000
+
+    @property
+    def transition_time(self):
+        return self._transition_time
 
     @property
     def danceability(self):
@@ -73,6 +79,18 @@ class Song:
     @property
     def bpm(self):
         return self._bpm
+
+    @property
+    def transition_bar_time(self):
+        return self._transition_bar_time
+
+    @transition_bar_time.setter
+    def transition_bar_time(self, time):
+        self._transition_bar_time = time
+
+    @transition_time.setter
+    def transition_time(self, time):
+        self._transition_time = time
 
     @danceability.setter
     def danceability(self, danceability):
