@@ -29,21 +29,23 @@ def join_songs(prev_song, next_song, request_id):
 def find_transition(prev_song, next_song, thresholds):
     bpm_difference = abs(prev_song.bpm - next_song.bpm)
     complexity_difference = abs(prev_song.dynamic_complexity - next_song.dynamic_complexity)
-    if complexity_difference > 3:
+    if complexity_difference > 3 or bpm_difference > 30:
         if prev_song.dynamic_complexity > next_song.dynamic_complexity:
             log.info("Loopout transition applied")
             return Loopout()
         else:
             log.info("Loopin transition applied")
             return LoopIn()
-    if bpm_difference > 15:
+    if 15 < bpm_difference < 25:
         log.info("Tempo transition applied")
         return Tempo()
-    if complexity_difference > 1.5:
+    elif complexity_difference < 1.5:
+        log.info("CrossFade transition applied")
+        return CrossFade()
+    else:
         log.info("SeamlessFade transition applied")
         return SeamlessFade()
-    log.info("Crossfade transition applied")
-    return CrossFade()
+
 
 
 class Augmentor:
