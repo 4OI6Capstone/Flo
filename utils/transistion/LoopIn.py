@@ -3,7 +3,7 @@ from pydub import scipy_effects
 from pydub import silence
 from utils.augmentation.song_extensions import song_extensions
 from utils.transistion.Transition import Transition
-from utils.transition_configs import loopout_config
+from utils.transition_configs import loopin_config
 
 
 class LoopIn(Transition):
@@ -28,7 +28,7 @@ class LoopIn(Transition):
         :return: Audiosegment with the loopin transition applied.
         """
 
-        prev_song_timestamp = kwargs.pop('transition_timestamp')
+        prev_song_timestamp = kwargs.pop('transition_time')
 
         # Get extension of song file
         next_ext = song_extensions.get(next_song.mime, next_song.mime)

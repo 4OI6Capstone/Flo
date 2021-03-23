@@ -1,10 +1,14 @@
 from pydub import AudioSegment
-
+import logging
 from utils.timestamp import get_timestamp_loop, get_timestamp
 from utils.transition_thresholds import transition_thresholds
 from utils.transistion.CrossFade import CrossFade
 from utils.transistion.Loopout import Loopout
+from utils.transistion.LoopIn import LoopIn
+from utils.transistion.Tempo import Tempo
+from utils.transistion.SeamlessFade import SeamlessFade
 
+log = logging.getLogger(__name__)
 
 def join_songs(prev_song, next_song, request_id):
     # Get transition specific configs
@@ -24,20 +28,21 @@ def join_songs(prev_song, next_song, request_id):
 
 def find_transition(prev_song, next_song, thresholds):
     bpm_difference = abs(prev_song.bpm - next_song.bpm)
-    dancabililty_difference = abs(prev_song.danceability - next_song.danceability)
-    loudness_difference = abs(prev_song.loudness - next_song.loudness)
-    # Loop through transitions and compare difference thresholds to song differences
-    #return Loopout()
-    for transition in thresholds:
-        transition_config = thresholds[transition]
-        bpm_threshold = transition_config.get('bpm_threshold')
-        danceability_threshold = transition_config.get('danceability_threshold')
-        loudness_threshold = transition_config.get('loudness_threshold')
-        if bpm_difference <= bpm_threshold and \
-                dancabililty_difference <= danceability_threshold and \
-                loudness_difference <= loudness_threshold:
-            return transition()
-    # Default transition to return for now
+    complexity_difference = abs(prev_song.dynamic_complexity - next_song.dynamic_complexity)
+    if complexity_difference > 3:
+        if prev_song.dynamic_complexity > next_song.dynamic_complexity:
+            log.info("Loopout transition applied")
+            return Loopout()
+        else:
+            log.info("Loopin transition applied")
+            return LoopIn()
+    if bpm_difference > 15:
+        log.info("Tempo transition applied")
+        return Tempo()
+    if complexity_difference > 1.5:
+        log.info("SeamlessFade transition applied")
+        return SeamlessFade()
+    log.info("Crossfade transition applied")
     return CrossFade()
 
 
