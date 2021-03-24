@@ -33,6 +33,7 @@ def join_songs(final_segment, curr_song, prev_song, transition_time, transition_
 
 
 def find_transition(prev_song, next_song, thresholds):
+    return SeamlessFade()
     bpm_difference = abs(prev_song.bpm - next_song.bpm)
     complexity_difference = abs(prev_song.dynamic_complexity - next_song.dynamic_complexity)
     if complexity_difference > 3 or bpm_difference > 30:
