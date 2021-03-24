@@ -33,6 +33,7 @@ def join_songs(final_segment, curr_song, prev_song, transition_time, transition_
 
 
 def find_transition(prev_song, next_song, thresholds):
+    return SeamlessFade()
     bpm_difference = abs(prev_song.bpm - next_song.bpm)
     complexity_difference = abs(prev_song.dynamic_complexity - next_song.dynamic_complexity)
     if complexity_difference > 3 or bpm_difference > 30:
@@ -76,7 +77,7 @@ class Augmentor:
             mixed_song_segment = join_songs(final_mix, curr_song_file, prev_song_file, transition_time,
                                             transition_bar_time, request_id)
             final_mix = mixed_song_segment
-            self.current_mix_time_ms = final_mix.duration_seconds*1000
+            self.current_mix_time_ms = (final_mix.duration_seconds*1000)-prev_song_file.length
 
         return final_mix
 
