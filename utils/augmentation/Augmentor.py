@@ -36,7 +36,7 @@ def find_transition(prev_song, next_song, thresholds):
     bpm_difference = abs(prev_song.bpm - next_song.bpm)
     complexity_difference = abs(prev_song.dynamic_complexity - next_song.dynamic_complexity)
     if complexity_difference > 3 or bpm_difference > 30:
-        if prev_song.dynamic_complexity > next_song.dynamic_complexity:
+        if prev_song.dynamic_complexity > next_song.dynamic_complexity or prev_song.bpm > next_song.bpm:
             log.info("Loopout transition applied")
             return Loopout()
         else:
@@ -76,7 +76,7 @@ class Augmentor:
             mixed_song_segment = join_songs(final_mix, curr_song_file, prev_song_file, transition_time,
                                             transition_bar_time, request_id)
             final_mix = mixed_song_segment
-            self.current_mix_time_ms = final_mix.duration_seconds*1000
+            self.current_mix_time_ms = (final_mix.duration_seconds*1000)-prev_song_file.length
 
         return final_mix
 

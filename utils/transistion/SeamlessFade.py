@@ -2,7 +2,7 @@ from pydub import AudioSegment
 from pydub import scipy_effects
 from utils.augmentation.song_extensions import song_extensions
 from utils.transistion.Transition import Transition
-from utils.transition_configs import loopout_config
+from utils.transition_configs import seamlessfade_config
 
 
 class SeamlessFade(Transition):
