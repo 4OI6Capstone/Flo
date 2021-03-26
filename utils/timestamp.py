@@ -116,7 +116,7 @@ def get_timestamp_loop(prev_song, next_song, sr=22050, mix_mode='random', offset
     # mix the files
     sync_time_ms = sync_sample / sr * 1000
 
-    return (sync_time_ms, sync_time_ms + ((4 / (prev_song.bpm / 60)) * 1000))
+    return sync_time_ms, sync_time_ms + ((4 / (prev_song.bpm / 60)) * 1000)
 
 def get_timestamp_loop_in(next_song):
     return (0,((4 / (next_song.bpm / 60)) * 1000))

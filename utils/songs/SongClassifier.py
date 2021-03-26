@@ -1,7 +1,11 @@
 import mutagen
+from pydub import AudioSegment
 from utils.music_data_fetcher import *
 from utils.songs.Song import Song
 from werkzeug.utils import secure_filename
+
+from utils.timestamp import get_timestamp_loop, get_timestamp
+
 
 def create_song_from_metadata(song, filename):
     artist = song.get('artist')
@@ -20,6 +24,7 @@ def add_fetched_acoustic_brainz_info(flo_song, acoustic_brainz_info):
     flo_song.bpm = round(rhythm_data.get("bpm"), 1)
     flo_song.danceability = rhythm_data.get("danceability")
     flo_song.loudness = low_level_data.get("average_loudness")
+    flo_song.dynamic_complexity = low_level_data.get("dynamic_complexity")
     return flo_song
 
 
@@ -34,10 +39,10 @@ class SongClassifier:
         self.song_list[str(request_id)] = []
         for file in song_list:
             # Saves song onto server
-            filename = self.save_song(file, request_id)
+            filename, filename_wav = self.save_song(file, request_id)
             # mutagen retrieves the metadata
             song = mutagen.File(filename, easy=True)
-            flo_song = create_song_from_metadata(song, filename)
+            flo_song = create_song_from_metadata(song, filename_wav)
             music_brainz_id = find_music_brainz_id_by_recording(flo_song)
             acoustic_brainz_low_info = get_acoustic_brainz_data(music_brainz_id, level="low-level")
             flo_song.music_brainz_id = music_brainz_id
@@ -49,7 +54,15 @@ class SongClassifier:
     def save_song(self, file, request_id):
         save_location = self._save_location.format(request_id, secure_filename(file.filename))
         file.save(save_location)
-        return save_location
+        my_mutagen = mutagen.File(save_location, easy=True)
+        mime = my_mutagen.mime.pop(0)
+        mime = mime.split("/")[1]
+        song_wav = AudioSegment.from_file(save_location, mime)
+        filename = file.filename.split(".")
+        filename = "{}.{}".format(filename[0], "wav")
+        save_location_wav = self._save_location.format(request_id, secure_filename(filename))
+        song_wav.export(save_location_wav, format="wav")
+        return save_location, save_location_wav
 
     @property
     def song_list(self):
