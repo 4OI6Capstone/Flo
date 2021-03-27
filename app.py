@@ -1,4 +1,5 @@
 from flask import Flask, send_file
+from flask_cors import CORS, cross_origin
 from flask import request
 from utils.augmentation.Augmentor import Augmentor
 from utils.songs.SongClassifier import SongClassifier
@@ -7,6 +8,7 @@ import pathlib
 import logging
 
 app = Flask(__name__)
+CORS(app, support_credentials=True)
 app.config['EXPORT_FOLDER'] = "./mixes/"
 app.config['UPLOADED_FOLDER'] = "./uploaded_files/"
 logging.basicConfig(filename='app.log', level=logging.INFO,
