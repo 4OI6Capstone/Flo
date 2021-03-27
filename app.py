@@ -43,7 +43,7 @@ def getmix():
     final_mix.export(file_path, format="mp4")
     # Returns request Id for particular mix
     try:
-        return send_file('./mixes/8e1a1fbd-c001-454f-9057-e822a617898a/final_mix.mp4', attachment_filename="final_mix.mp4")
+        return send_file(file_path, attachment_filename="final_mix.mp4")
     except Exception as e:
         return str(e)
 
